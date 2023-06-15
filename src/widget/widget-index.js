@@ -21,7 +21,7 @@ const animationStyles = `
   }
   50% {
     transform: scale(0.5);
-    background-color: #B7A65C;
+    background-color: #404040;
   }
   100% {
     transform: scale(1);
