@@ -62,7 +62,7 @@ export default class ConsentSwitch extends Component {
         <div class="chat-header">
           <h5>Questions? Problems? Chat with us!</h5>
           <p>
-            It's currently {`${hours}:${minutes}${ampm}`} where we are, if we're
+            It's currently <strong>{`${hours}:${minutes}${ampm}`}</strong> where we are, if we're
             awake then we'll typically respond to your message within a few
             minutes.
           </p>

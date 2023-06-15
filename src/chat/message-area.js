@@ -1,5 +1,5 @@
 import { Component, h } from "preact";
-import { danielleImg, jamesImg } from "./admin-images";
+import { danielleImg, jamesImg, lmaImg, otterImg } from "./admin-images";
 
 import MarkdownIt from "markdown-it";
 import dateFormat from "dateformat";
@@ -9,7 +9,9 @@ const dayInMillis = 60 * 60 * 24 * 1000;
 
 const admins = {
   jivings: jamesImg,
-  dinkydani: danielleImg
+  dinkydani: danielleImg,
+  jameswilliamr: otterImg,
+  admin: lmaImg
 };
 export default class MessageArea extends Component {
   componentDidMount() {
@@ -29,7 +31,7 @@ export default class MessageArea extends Component {
           this.ref = r;
         }}
       >
-        {props.messages.map(({ name, text, from, time, adminName }) => {
+        {props.messages.map(({ name, text, from, time, adminName = 'admin' }) => {
           const renderedMsg = md.render(text);
           console.log(renderedMsg);
           const isAdmin = from !== "visitor";

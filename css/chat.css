@@ -27,13 +27,8 @@ body {
 
 .chat-header {
   position: relative;
-  /* color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-  background-image: url(../media/cover-tile-dark.jpg);
-  background-repeat: repeat;
-  background-size: 160px; */
   color: #404040;
-  background-color: #e8e8e8;
+  background-color: #ffe5e5;
   padding: 30px 20px 15px 20px;
 }
 
