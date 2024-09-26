@@ -6,18 +6,15 @@ import { danielleImg, jamesImg, otterImg } from './admin-images';
 import Chat from './chat';
 import Consent from './consent';
 
-const now = new Date().toLocaleString('en-US', {
-  timeZone: 'Europe/London'
-});
-let hours = new Date(now).getHours();
-let minutes = new Date(now).getMinutes();
-if (hours < 10) {
-  hours = `0${hours}`;
-}
-if (minutes < 10) {
-  minutes = `0${minutes}`;
-}
-const ampm = hours >= 12 ? 'pm' : 'am';
+const timeOptions = {
+  timeZone: 'Europe/London',
+  hour: 'numeric', 
+  minute: '2-digit',
+  hour12: true,
+};
+
+const timeFormatter = new Intl.DateTimeFormat('en-GB', timeOptions);
+const timeNow = timeFormatter.format(new Date());
 
 let conf = {};
 const confString = getUrlParameter('conf');
@@ -62,7 +59,7 @@ export default class ConsentSwitch extends Component {
         <div class="chat-header">
           <h5>Questions? Problems? Chat with us!</h5>
           <p>
-            It's currently <strong>{`${hours}:${minutes}${ampm}`}</strong> where we are, if we're
+            It's currently <strong>{timeNow}</strong> where we are, if we're
             awake then we'll typically respond to your message within a few
             minutes.
           </p>
