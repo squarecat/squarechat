@@ -91,7 +91,7 @@ io.on("connection", function (client) {
     const { isNewUser, chatId, userId, oldId, userData, currentUrl } =
       registerMsg;
     console.log("register user", userId);
-    client.userData = userData;
+    client.userData = userData || {};
     connectedSockets[userId] = client;
     let messageReceived = false;
     // check the buffer and send anything in there
@@ -139,7 +139,6 @@ io.on("connection", function (client) {
             console.log("sending start msg");
             sendStartMessage(chatId, {
               ...userData,
-              location,
               currentUrl,
             });
             return createMissiveConversation({
