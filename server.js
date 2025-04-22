@@ -11,7 +11,7 @@ if (!process.env.TELEGRAM_TOKEN) {
   console.error("TELEGRAM_TOKEN not provided");
   process.exit(1);
 }
-const channelId = process.env.TELEGRAM_CHANNEL_ID;
+const channelId = parseInt(process.env.TELEGRAM_CHANNEL_ID);
 const topicId = parseInt(process.env.TOPIC_ID);
 const connectedSockets = {};
 const messageBuffer = {};
@@ -38,9 +38,8 @@ app.post("/hook", function (req, res) {
       if (text.startsWith("/start")) {
         console.log("/start chatId " + chatId);
         sendTelegramMessage(
-          chatId,
           "*Welcome to Intergram* \n" +
-            "Your unique chat id is `" +
+            "The chat id is `" +
             chatId +
             "`\n" +
             "Use it to link between the embedded chat and this telegram chat",
@@ -137,7 +136,6 @@ io.on("connection", function (client) {
 
     if (oldId) {
       sendMessage(
-        chatId,
         userId,
         `Lead ${oldId} has logged in as ${userData.email}`
       ).then(() => {
@@ -176,18 +174,13 @@ io.on("connection", function (client) {
           }
           messageReceived = true;
           client.emit(chatId + "-" + userId, msg);
-          return sendMessage(
-            chatId,
-            userId,
-            msg.text,
-            userData ? userData.email : ""
-          );
+          return sendMessage(userId, msg.text, userData ? userData.email : "");
         });
     });
 
     client.on("disconnect", function () {
       if (messageReceived) {
-        sendTelegramMessage(chatId, userId + " has left");
+        sendTelegramMessage(userId + " has left");
       }
       delete connectedSockets[userId];
     });
@@ -214,15 +207,11 @@ function sendStartMessage(chatId, userData = {}) {
 `;
   }
   text = `${text}`;
-  return sendTelegramMessage(chatId, text, "HTML");
+  return sendTelegramMessage(text, "HTML");
 }
 
-function sendMessage(chatId, userId, text, email = "") {
-  return sendTelegramMessage(
-    chatId,
-    `<b>[${userId}]</b> ${email}:\n${text}`,
-    "HTML"
-  );
+function sendMessage(userId, text, email = "") {
+  return sendTelegramMessage(`<b>[${userId}]</b> ${email}:\n${text}`, "HTML");
 }
 
 app.post("/usage-start", cors(), function (req, res) {
@@ -296,7 +285,7 @@ function setTyping(chatId) {
   });
 }
 
-function sendTelegramMessage(text, parseMode) {
+function sendTelegramMessage(text, parseMode = "HTML") {
   let data = {
     chat_id: channelId,
     text: text,
@@ -334,7 +323,6 @@ function sendTelegramMessage(text, parseMode) {
 
 process.on("uncaughtException", (error) => {
   sendTelegramMessage(
-    "-388078727",
     `Server uncaught exception:
 ${error.toString()}
 `
@@ -344,7 +332,6 @@ ${error.toString()}
 
 process.on("unhandledRejection", (error) => {
   sendTelegramMessage(
-    "-388078727",
     `Server unhandled rejection:
 ${error.toString()}
 `
