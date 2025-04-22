@@ -25,7 +25,7 @@ app.post("/hook", function (req, res) {
     console.log(JSON.stringify(req.body, null, 2));
 
     const message = req.body.message || req.body.channel_post;
-    if (topicId && message.message_thread_id === topicId) {
+    if (!topicId || message.message_thread_id === topicId) {
       const chatId = message.chat.id;
       const name = message.chat.first_name || message.chat.title || "admin";
       const text = message.text || "";
