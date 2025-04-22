@@ -1,12 +1,12 @@
-import * as store from 'store';
+import * as store from "store";
 
-import { Component, h } from 'preact';
+import { Component, h } from "preact";
 
-import MessageArea from './message-area';
-import io from 'socket.io-client';
+import MessageArea from "./message-area";
+import io from "socket.io-client";
 
 export default class Chat extends Component {
-  autoResponseState = 'pristine'; // pristine, set or canceled
+  autoResponseState = "pristine"; // pristine, set or canceled
   autoResponseTimer = 0;
 
   constructor(props) {
@@ -24,28 +24,28 @@ export default class Chat extends Component {
   }
 
   componentDidMount() {
-    this.socket = io.connect();
-    const oldId = store.get('oldId');
-    this.socket.on('connect', () => {
-      this.socket.emit('register', {
+    this.socket = io();
+    const oldId = store.get("oldId");
+    this.socket.on("connect", () => {
+      this.socket.emit("register", {
         chatId: this.props.chatId,
         userId: this.props.userId,
         isNewUser: this.props.isNewUser,
         userData: this.props.conf.userData,
         currentUrl: this.props.conf.url,
-        oldId
+        oldId,
       });
     });
-    store.set('oldId', null);
+    store.set("oldId", null);
     this.socket.on(
-      this.props.chatId + '-' + this.props.userId,
+      this.props.chatId + "-" + this.props.userId,
       this.incomingMessage
     );
 
     if (!this.state.messages.length) {
       this.writeToMessages({
         text: this.props.conf.introMessage,
-        from: 'admin'
+        from: "admin",
       });
     }
   }
@@ -70,24 +70,24 @@ export default class Chat extends Component {
   handleKeyPress = (e) => {
     let message;
     let timeout;
-    const now = new Date().toLocaleString('en-US', {
-      timeZone: 'Asia/Singapore'
+    const now = new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Singapore",
     });
     let hours = new Date(now).getHours();
     const isNightTime = hours < 8 && hours > 11;
-    this.socket.send({ action: 'typing' });
+    this.socket.send({ action: "typing" });
     if (e.keyCode == 13 && this.input.value) {
       let text = this.input.value;
       this.socket.send({
-        action: 'message',
+        action: "message",
         msg: {
           text,
-          from: 'visitor'
+          from: "visitor",
         },
-        userData: this.props.conf.userData
+        userData: this.props.conf.userData,
       });
-      this.input.value = '';
-      if (this.autoResponseState === 'pristine') {
+      this.input.value = "";
+      if (this.autoResponseState === "pristine") {
         if (isNightTime) {
           timeout = 1000;
           message = `(Auto message) It's night time right now and we're probably asleep, please leave your email so we can contact you later, or fill out the <a href="https://leavemealone.com/feedback" target="_">form here</a>.`;
@@ -98,24 +98,24 @@ export default class Chat extends Component {
         this.autoResponseTimer = setTimeout(() => {
           this.writeToMessages({
             text: message,
-            from: 'admin'
+            from: "admin",
           });
-          this.autoResponseState = 'canceled';
+          this.autoResponseState = "canceled";
         }, timeout); // 2 MINUTES
-        this.autoResponseState = 'set';
+        this.autoResponseState = "set";
       }
     }
   };
 
   incomingMessage = (msg) => {
     this.writeToMessages(msg);
-    if (msg.from === 'admin') {
-      document.getElementById('messageSound').play();
+    if (msg.from === "admin") {
+      document.getElementById("messageSound").play();
 
-      if (this.autoResponseState === 'pristine') {
-        this.autoResponseState = 'canceled';
-      } else if (this.autoResponseState === 'set') {
-        this.autoResponseState = 'canceled';
+      if (this.autoResponseState === "pristine") {
+        this.autoResponseState = "canceled";
+      } else if (this.autoResponseState === "set") {
+        this.autoResponseState = "canceled";
         clearTimeout(this.autoResponseTimer);
       }
     }
@@ -133,7 +133,7 @@ export default class Chat extends Component {
       return;
     }
     this.setState({
-      message: this.state.messages.push(msg)
+      message: this.state.messages.push(msg),
     });
 
     if (store.enabled) {
@@ -142,7 +142,7 @@ export default class Chat extends Component {
           messages.push(msg);
         });
       } catch (e) {
-        console.log('failed to add new message to local storage', e);
+        console.log("failed to add new message to local storage", e);
         store.set(this.messagesKey, []);
       }
     }
