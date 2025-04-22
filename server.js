@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 // handle admin Telegram messages
 app.post("/hook", function (req, res) {
   try {
-    console.log(JSON.stringify(req.body, null, 2));
+    console.log("got message", `"${req.body.message.text}"`);
 
     const message = req.body.message || req.body.channel_post;
     if (!topicId || message.message_thread_id === topicId) {
@@ -53,7 +53,10 @@ app.post("/hook", function (req, res) {
           const userId = userIdMatch[1];
 
           if (connectedSockets[userId]) {
-            console.log("client connected sending message");
+            console.log(
+              "client connected sending message",
+              `${chatId}-${userId}`
+            );
             const sock = connectedSockets[userId];
             sock.emit(chatId + "-" + userId, {
               name,
@@ -80,6 +83,10 @@ app.post("/hook", function (req, res) {
               adminName: from,
             });
           }
+        } else {
+          console.log(
+            "Ignoring message as id didn't match any connected users"
+          );
         }
       }
     } else {
@@ -94,7 +101,6 @@ app.post("/hook", function (req, res) {
 
 // handle chat visitors websocket messages
 io.on("connection", function (client) {
-  let conversationId = null;
   const address = client.handshake.address.replace("::ffff:", "");
   client.on("register", function (registerMsg) {
     const {
