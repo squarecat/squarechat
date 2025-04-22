@@ -30,6 +30,7 @@
     "compression": "^1.6.2",
     "cors": "^2.8.1",
     "dateformat": "^2.0.0",
+    "dotenv": "^16.5.0",
     "eslint": "^3.2.2",
     "express": "4.10.2",
     "markdown-it": "^10.0.0",

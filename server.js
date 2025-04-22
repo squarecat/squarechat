@@ -1,5 +1,5 @@
+require("dotenv").config();
 const request = require("request");
-const compression = require("compression");
 const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -382,7 +382,12 @@ function appendMissiveConversationAgent({ conversationId, email, message }) {
   return new Promise((resolve, reject) => {
     request.post(
       missiveUrl,
-      { json: converstaionData },
+      {
+        json: converstaionData,
+        headers: {
+          Authorization: `Bearer ${process.env.MISSIVE_API_TOKEN}`,
+        },
+      },
       function (err, resp, body) {
         if (err) {
           console.error(err);
@@ -414,7 +419,12 @@ function appendMissiveConversationCustomer({ conversationId, email, message }) {
   return new Promise((resolve, reject) => {
     request.post(
       missiveUrl,
-      { json: converstaionData },
+      {
+        json: converstaionData,
+        headers: {
+          Authorization: `Bearer ${process.env.MISSIVE_API_TOKEN}`,
+        },
+      },
       function (err, resp, body) {
         if (err) {
           console.error(err);
