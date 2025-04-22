@@ -22,6 +22,7 @@ app.use(bodyParser.json());
 // handle admin Telegram messages
 app.post("/hook", function (req, res) {
   try {
+    console.log(JSON.stringify(req.body, null, 2));
     const message = req.body.message || req.body.channel_post;
     const chatId = message.chat.id;
     const name = message.chat.first_name || message.chat.title || "admin";
@@ -289,10 +290,18 @@ function setTyping(chatId) {
 }
 
 function sendTelegramMessage(text, parseMode) {
+  const data = {
+    chat_id: channelId,
+    message_thread_id: topicId,
+    text: text,
+    parse_mode: parseMode,
+  };
   const url =
     "https://api.telegram.org/bot" +
     process.env.TELEGRAM_TOKEN +
     "/sendMessage";
+
+  console.log("Sending message to Telegram", JSON.stringify(data, null, 2));
 
   return new Promise((resolve, reject) => {
     request
@@ -303,12 +312,7 @@ function sendTelegramMessage(text, parseMode) {
         }
         resolve(body);
       })
-      .form({
-        chat_id: channelId,
-        message_thread_id: topicId,
-        text: text,
-        parse_mode: parseMode,
-      });
+      .form(data);
   });
 }
 
