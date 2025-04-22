@@ -11,6 +11,8 @@ if (!process.env.TELEGRAM_TOKEN) {
   console.error("TELEGRAM_TOKEN not provided");
   process.exit(1);
 }
+const channelId = process.env.TELEGRAM_CHANNEL_ID;
+const topicId = process.env.TOPIC_ID;
 const connectedSockets = {};
 const messageBuffer = {};
 
@@ -286,7 +288,7 @@ function setTyping(chatId) {
   });
 }
 
-function sendTelegramMessage(chatId, text, parseMode) {
+function sendTelegramMessage(text, parseMode) {
   const url =
     "https://api.telegram.org/bot" +
     process.env.TELEGRAM_TOKEN +
@@ -302,7 +304,8 @@ function sendTelegramMessage(chatId, text, parseMode) {
         resolve(body);
       })
       .form({
-        chat_id: chatId,
+        chat_id: channelId,
+        message_thread_id: topicId,
         text: text,
         parse_mode: parseMode,
       });
@@ -330,6 +333,7 @@ ${error.toString()}
 });
 
 const missiveUrl = "https://public.missiveapp.com/v1/messages";
+
 function createMissiveConversation({ email, message }) {
   const converstaionData = {
     messages: {
