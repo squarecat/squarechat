@@ -313,7 +313,14 @@ function sendTelegramMessage(text, parseMode) {
         resolve(body);
       })
       .form(data);
-  });
+  })
+    .then(() => {
+      console.log("Sent Telegram message");
+    })
+    .catch((err) => {
+      console.error("Failed to send Telegram message");
+      console.error(err);
+    });
 }
 
 process.on("uncaughtException", (error) => {
