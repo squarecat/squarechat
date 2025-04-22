@@ -88,10 +88,16 @@ io.on("connection", function (client) {
   let conversationId = null;
   const address = client.handshake.address.replace("::ffff:", "");
   client.on("register", function (registerMsg) {
-    const { isNewUser, chatId, userId, oldId, userData, currentUrl } =
-      registerMsg;
+    const {
+      isNewUser,
+      chatId,
+      userId,
+      oldId,
+      userData = {},
+      currentUrl,
+    } = registerMsg;
     console.log("register user", userId);
-    client.userData = userData || {};
+    client.userData = userData;
     connectedSockets[userId] = client;
     let messageReceived = false;
     // check the buffer and send anything in there
