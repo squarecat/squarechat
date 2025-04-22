@@ -16,6 +16,8 @@ const topicId = process.env.TOPIC_ID;
 const connectedSockets = {};
 const messageBuffer = {};
 
+console.log("Connected to", channelId, `#${topicId}`);
+
 app.use(express.static("dist", { index: "demo.html", maxage: "4h" }));
 app.use(bodyParser.json());
 
