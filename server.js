@@ -253,22 +253,6 @@ app.get("/.well-known/acme-challenge/:content", (req, res) => {
   res.send(process.env.CERTBOT_RESPONSE);
 });
 
-function getIpAddressGeo(ip) {
-  return new Promise((resolve, reject) => {
-    request.get(
-      `https://api.ipgeolocation.io/ipgeo?apiKey=${process.env.GEO_KEY}&ip=${ip}`,
-      (err, resp, body) => {
-        if (err) {
-          console.log(body);
-          return reject(err);
-        }
-        console.log(body);
-        resolve(JSON.parse(body).country_name);
-      }
-    );
-  });
-}
-
 function setTyping(chatId) {
   return new Promise((resolve, reject) => {
     request
@@ -348,6 +332,11 @@ ${error.toString()}
 const missiveUrl = "https://public.missiveapp.com/v1/messages";
 
 function createMissiveConversation({ email, message }) {
+  if (!email) {
+    console.log("No email provided, skipping Missive conversation");
+    return Promise.resolve();
+  }
+  console.log("Creating Missive conversation", message);
   const converstaionData = {
     messages: {
       conversation_subject: `Live Chat message from ${email}`,
@@ -378,6 +367,10 @@ function createMissiveConversation({ email, message }) {
           console.error(err);
           return reject(err);
         }
+        console.log(
+          "Missive conversation created",
+          JSON.stringify(body, null, 2)
+        );
         resolve({ conversationId: body.conversationId });
       }
     );
@@ -385,6 +378,11 @@ function createMissiveConversation({ email, message }) {
 }
 
 function appendMissiveConversationAgent({ conversationId, email, message }) {
+  if (!email) {
+    console.log("No email provided, skipping Missive conversation");
+    return Promise.resolve();
+  }
+  console.log("Appending Missive conversation", conversationId, message);
   const converstaionData = {
     messages: {
       conversation: conversationId,
@@ -415,6 +413,10 @@ function appendMissiveConversationAgent({ conversationId, email, message }) {
           console.error(err);
           return reject(err);
         }
+        console.log(
+          "Missive conversation updated",
+          JSON.stringify(body, null, 2)
+        );
         resolve(body);
       }
     );
@@ -422,6 +424,7 @@ function appendMissiveConversationAgent({ conversationId, email, message }) {
 }
 
 function appendMissiveConversationCustomer({ conversationId, email, message }) {
+  console.log("Appending Missive conversation", conversationId, message);
   const converstaionData = {
     messages: {
       conversation: conversationId,
@@ -452,6 +455,10 @@ function appendMissiveConversationCustomer({ conversationId, email, message }) {
           console.error(err);
           return reject(err);
         }
+        console.log(
+          "Missive conversation updated",
+          JSON.stringify(body, null, 2)
+        );
         resolve(body);
       }
     );
