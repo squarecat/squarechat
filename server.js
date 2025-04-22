@@ -12,7 +12,7 @@ if (!process.env.TELEGRAM_TOKEN) {
   process.exit(1);
 }
 const channelId = process.env.TELEGRAM_CHANNEL_ID;
-const topicId = process.env.TOPIC_ID;
+const topicId = parseInt(process.env.TOPIC_ID);
 const connectedSockets = {};
 const messageBuffer = {};
 
