@@ -206,10 +206,9 @@ function sendStartMessage(chatId, userData = {}) {
   } else {
     text = `A user has started a chat.
 <b>ID:</b>\t ${id}
-<b>Email:</b>\t ${email}
-<b>Location:</b>\t ${location || "unknown"}
+<b>Email:</b>\t ${email ? email.replace(/(?<=.{2}).(?=.*@)/g, "*") : ""}
 <b>URL:</b>\t ${currentUrl || "unknown"}
-<b>Stripe:</b>\t https://dashboard.stripe.com/search?query=${email}
+<b>Admin:</b>\t https://admin.leavemealone.com/#/users/${id}
 `;
   }
   text = `${text}`;
