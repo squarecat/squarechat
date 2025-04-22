@@ -23,61 +23,66 @@ app.use(bodyParser.json());
 app.post("/hook", function (req, res) {
   try {
     console.log(JSON.stringify(req.body, null, 2));
+
     const message = req.body.message || req.body.channel_post;
-    const chatId = message.chat.id;
-    const name = message.chat.first_name || message.chat.title || "admin";
-    const text = message.text || "";
-    const reply = message.reply_to_message;
-    const from = message.from.username;
-    res.statusCode = 200;
+    if (topicId && message.message_thread_id === topicId) {
+      const chatId = message.chat.id;
+      const name = message.chat.first_name || message.chat.title || "admin";
+      const text = message.text || "";
+      const reply = message.reply_to_message;
+      const from = message.from.username;
+      res.statusCode = 200;
 
-    if (text.startsWith("/start")) {
-      console.log("/start chatId " + chatId);
-      sendTelegramMessage(
-        chatId,
-        "*Welcome to Intergram* \n" +
-          "Your unique chat id is `" +
-          chatId +
-          "`\n" +
-          "Use it to link between the embedded chat and this telegram chat",
-        "Markdown"
-      );
-    } else if (reply) {
-      let replyText = reply.text || "";
-      // check if a reply to someone known
-      const userIdMatch = replyText.match(/^\[(.+)\]/);
-      if (userIdMatch) {
-        const userId = userIdMatch[1];
+      if (text.startsWith("/start")) {
+        console.log("/start chatId " + chatId);
+        sendTelegramMessage(
+          chatId,
+          "*Welcome to Intergram* \n" +
+            "Your unique chat id is `" +
+            chatId +
+            "`\n" +
+            "Use it to link between the embedded chat and this telegram chat",
+          "Markdown"
+        );
+      } else if (reply) {
+        let replyText = reply.text || "";
+        // check if a reply to someone known
+        const userIdMatch = replyText.match(/^\[(.+)\]/);
+        if (userIdMatch) {
+          const userId = userIdMatch[1];
 
-        if (connectedSockets[userId]) {
-          console.log("client connected sending message");
-          const sock = connectedSockets[userId];
-          sock.emit(chatId + "-" + userId, {
-            name,
-            text,
-            from: "admin",
-            adminName: from,
-          });
-          // check if connected, if not then buffer
-          appendMissiveConversationAgent({
-            conversationId: sock.conversationId,
-            email: sock.userData.email,
-            message: replyText,
-          });
-        } else {
-          if (!messageBuffer[userId]) {
-            messageBuffer[userId] = [];
+          if (connectedSockets[userId]) {
+            console.log("client connected sending message");
+            const sock = connectedSockets[userId];
+            sock.emit(chatId + "-" + userId, {
+              name,
+              text,
+              from: "admin",
+              adminName: from,
+            });
+            // check if connected, if not then buffer
+            appendMissiveConversationAgent({
+              conversationId: sock.conversationId,
+              email: sock.userData.email,
+              message: replyText,
+            });
+          } else {
+            if (!messageBuffer[userId]) {
+              messageBuffer[userId] = [];
+            }
+            console.log("client not connected buffering message");
+            messageBuffer[userId].unshift({
+              chatId,
+              name,
+              text,
+              from: "admin",
+              adminName: from,
+            });
           }
-          console.log("client not connected buffering message");
-          messageBuffer[userId].unshift({
-            chatId,
-            name,
-            text,
-            from: "admin",
-            adminName: from,
-          });
         }
       }
+    } else {
+      console.log("Ignoring message in other topic");
     }
   } catch (e) {
     console.error("hook error", e, req.body);
@@ -290,12 +295,14 @@ function setTyping(chatId) {
 }
 
 function sendTelegramMessage(text, parseMode) {
-  const data = {
+  let data = {
     chat_id: channelId,
-    message_thread_id: topicId,
     text: text,
     parse_mode: parseMode,
   };
+  if (topicId) {
+    data.message_thread_id = topicId;
+  }
   const url =
     "https://api.telegram.org/bot" +
     process.env.TELEGRAM_TOKEN +
