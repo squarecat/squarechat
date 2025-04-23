@@ -143,9 +143,9 @@ io.on("connection", function (client) {
     if (oldId) {
       sendMessage(
         userId,
-        `Lead ${oldId} has logged in as ${userData.email}`
+        `Lead ${oldId} has logged in as ${obfuscateEmail(userData.email)}`
       ).then(() => {
-        return sendStartMessage(chatId, { ...userData, currentUrl });
+        return sendStartMessage({ ...userData, currentUrl });
       });
     }
     client.on("message", function (data) {
@@ -157,7 +157,7 @@ io.on("connection", function (client) {
         .then(() => {
           if (isNewUser && !messageReceived) {
             console.log("sending start msg");
-            sendStartMessage(chatId, {
+            sendStartMessage({
               ...userData,
               currentUrl,
             });
@@ -193,8 +193,8 @@ io.on("connection", function (client) {
   });
 });
 
-function sendStartMessage(chatId, userData = {}) {
-  const { id, name, email, provider, location, currentUrl } = userData;
+function sendStartMessage(userData = {}) {
+  const { id, email, currentUrl } = userData;
   console.log(userData);
   const isLead = !email;
   let text = "";
@@ -206,7 +206,7 @@ function sendStartMessage(chatId, userData = {}) {
   } else {
     text = `A user has started a chat.
 <b>ID:</b>\t ${id}
-<b>Email:</b>\t ${email ? email.replace(/(?<=.{2}).(?=.*@)/g, "*") : ""}
+<b>Email:</b>\t ${obfuscateEmail(email)}
 <b>URL:</b>\t ${currentUrl || "unknown"}
 <b>Admin:</b>\t https://admin.leavemealone.com/#/users/${id}
 `;
@@ -216,7 +216,10 @@ function sendStartMessage(chatId, userData = {}) {
 }
 
 function sendMessage(userId, text, email = "") {
-  return sendTelegramMessage(`<b>[${userId}]</b> ${email}:\n${text}`, "HTML");
+  return sendTelegramMessage(
+    `<b>[${userId}]</b> ${obfuscateEmail(email)}:\n${text}`,
+    "HTML"
+  );
 }
 
 app.post("/usage-start", cors(), function (req, res) {
@@ -465,4 +468,8 @@ function appendMissiveConversationCustomer({ conversationId, email, message }) {
       }
     );
   });
+}
+
+function obfuscateEmail(email) {
+  return email ? email.replace(/(?<=.{2}).(?=.*@)/g, "*") : "";
 }
