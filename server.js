@@ -219,11 +219,12 @@ function sendStartMessage(userData = {}) {
   let text = "";
 
   if (isLead) {
-    text = `<b>${fruit} New Lead</b>
+    text = `<b>New Lead ${fruit} </b>
 <b>URL:</b>\t ${currentUrl || "unknown"}
 `;
   } else {
-    text = `${fruit} A user has started a chat.
+    text = `A user has started a chat.
+${fruit}
 <b>ID:</b>\t ${id}
 <b>Email:</b>\t ${obfuscateEmail(email)}
 <b>URL:</b>\t ${currentUrl || "unknown"}
@@ -236,7 +237,7 @@ function sendStartMessage(userData = {}) {
 
 function sendMessage(userId, text, email = "", fruit = "") {
   return sendTelegramMessage(
-    `<b>${fruit} [${userId}]</b> ${obfuscateEmail(email)}:\n${text}`,
+    `<b>[${userId}]</b> ${fruit} ${obfuscateEmail(email)}:\n${text}`,
     "HTML"
   );
 }
