@@ -223,8 +223,7 @@ function sendStartMessage(userData = {}) {
 <b>URL:</b>\t ${currentUrl || "unknown"}
 `;
   } else {
-    text = `A user has started a chat.
-${fruit}
+    text = `A user has started a chat ${fruit}
 <b>ID:</b>\t ${id}
 <b>Email:</b>\t ${obfuscateEmail(email)}
 <b>URL:</b>\t ${currentUrl || "unknown"}
