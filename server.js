@@ -7,6 +7,9 @@ const app = express();
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
 
+const fruits = ["🍏", "🍌", "🍇", "🍈", "🍉", "🍊", "🍋", "🍍", "🥭"];
+let fruitIndex = 0;
+
 if (!process.env.TELEGRAM_TOKEN) {
   console.error("TELEGRAM_TOKEN not provided");
   process.exit(1);
@@ -112,7 +115,12 @@ io.on("connection", function (client) {
       currentUrl,
     } = registerMsg;
     console.log("register user", userId);
+    userData.fruit = fruits[fruitIndex++];
+    if (fruitIndex >= fruits.length) {
+      fruitIndex = 0;
+    }
     client.userData = userData;
+
     connectedSockets[userId] = client;
     let messageReceived = false;
     // check the buffer and send anything in there
@@ -143,7 +151,9 @@ io.on("connection", function (client) {
     if (oldId) {
       sendMessage(
         userId,
-        `Lead ${oldId} has logged in as ${obfuscateEmail(userData.email)}`
+        `Lead ${oldId} has logged in as ${obfuscateEmail(userData.email)}`,
+        "",
+        userData.fruit
       ).then(() => {
         return sendStartMessage({ ...userData, currentUrl });
       });
@@ -176,11 +186,20 @@ io.on("connection", function (client) {
               conversationId: client.conversationId,
               email: userData.email,
               message: msg.text,
+            }).then((conversationId) => {
+              // just in case the conversation id changes
+              // we try and stick with it
+              client.conversationId = conversationId;
             });
           }
           messageReceived = true;
           client.emit(chatId + "-" + userId, msg);
-          return sendMessage(userId, msg.text, userData ? userData.email : "");
+          return sendMessage(
+            userId,
+            msg.text,
+            userData ? userData.email : "",
+            userData ? userData.fruit : ""
+          );
         });
     });
 
@@ -194,17 +213,17 @@ io.on("connection", function (client) {
 });
 
 function sendStartMessage(userData = {}) {
-  const { id, email, currentUrl } = userData;
+  const { id, email, currentUrl, fruit } = userData;
   console.log(userData);
   const isLead = !email;
   let text = "";
 
   if (isLead) {
-    text = `<b>New Lead</b>
+    text = `<b>${fruit} New Lead</b>
 <b>URL:</b>\t ${currentUrl || "unknown"}
 `;
   } else {
-    text = `A user has started a chat.
+    text = `${fruit} A user has started a chat.
 <b>ID:</b>\t ${id}
 <b>Email:</b>\t ${obfuscateEmail(email)}
 <b>URL:</b>\t ${currentUrl || "unknown"}
@@ -215,9 +234,9 @@ function sendStartMessage(userData = {}) {
   return sendTelegramMessage(text, "HTML");
 }
 
-function sendMessage(userId, text, email = "") {
+function sendMessage(userId, text, email = "", fruit = "") {
   return sendTelegramMessage(
-    `<b>[${userId}]</b> ${obfuscateEmail(email)}:\n${text}`,
+    `<b>${fruit} [${userId}]</b> ${obfuscateEmail(email)}:\n${text}`,
     "HTML"
   );
 }
@@ -424,7 +443,8 @@ function appendMissiveConversationAgent({ conversationId, email, message }) {
           "Missive conversation updated",
           JSON.stringify(body, null, 2)
         );
-        resolve(body);
+        const conversationId = body.messages.conversation;
+        resolve(conversationId);
       }
     );
   });
@@ -466,7 +486,8 @@ function appendMissiveConversationCustomer({ conversationId, email, message }) {
           "Missive conversation updated",
           JSON.stringify(body, null, 2)
         );
-        resolve(body);
+        const conversationId = body.messages.conversation;
+        resolve(conversationId);
       }
     );
   });
