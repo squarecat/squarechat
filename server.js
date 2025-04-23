@@ -360,6 +360,9 @@ function createMissiveConversation({ email, message }) {
       missiveUrl,
       {
         json: converstaionData,
+        headers: {
+          Authorization: `Bearer ${process.env.MISSIVE_API_TOKEN}`,
+        },
       },
       function (err, resp, body) {
         if (err) {
