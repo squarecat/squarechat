@@ -68,7 +68,7 @@ app.post("/hook", function (req, res) {
             appendMissiveConversationAgent({
               conversationId: sock.conversationId,
               email: sock.userData.email,
-              message: replyText,
+              message: text,
             });
           } else {
             if (!messageBuffer[userId]) {
