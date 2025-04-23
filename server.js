@@ -129,8 +129,8 @@ io.on("connection", function (client) {
           adminName,
         });
         appendMissiveConversationAgent({
-          conversationId: sock.conversationId,
-          email: sock.userData.email,
+          conversationId: client.conversationId,
+          email: client.userData.email,
           message: text,
         });
         msg = buffered.pop();
@@ -170,10 +170,10 @@ io.on("connection", function (client) {
         })
         .then((newConversationId) => {
           if (newConversationId) {
-            conversationId = newConversationId;
             client.conversationId = newConversationId;
           } else {
             appendMissiveConversationCustomer({
+              conversationId: client.conversationId,
               email: userData.email,
               message: msg.text,
             });
@@ -376,7 +376,9 @@ function createMissiveConversation({ email, message }) {
           "Missive conversation created",
           JSON.stringify(body, null, 2)
         );
-        resolve({ conversationId: body.conversationId });
+        const conversationId = body.messages.conversation;
+        console.log("Set missive conversation ID", conversationId);
+        resolve(conversationId);
       }
     );
   });
